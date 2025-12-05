@@ -1,0 +1,236 @@
+﻿@model PWALMS.Models.Quiz
+@{
+    ViewData["Title"] = "Take Quiz";
+    var questions = ViewBag.Questions as List<PWALMS.Models.Question> ?? new List<PWALMS.Models.Question>();
+    var attemptId = ViewBag.AttemptId as int? ?? 0;
+    var timeLimit = ViewBag.TimeLimit as int? ?? 30;
+}
+
+<div class="container">
+    <div class="card">
+        <div class="card-header bg-primary text-white">
+            <div class="d-flex justify-content-between align-items-center">
+                <h4 class="mb-0">@Model.QuizTitle</h4>
+                <div class="timer-box">
+                    <h5 class="mb-0" id="quizTimer">@timeLimit:00</h5>
+                    <div class="progress" style="height: 5px;">
+                        <div id="timerProgress" class="progress-bar bg-info" style="width: 100%"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card-body">
+            <form id="quizForm">
+                <input type="hidden" id="attemptId" value="@attemptId" />
+
+                @for (int i = 0; i < questions.Count; i++)
+                {
+                    var question = questions[i];
+
+                    <div class="question-box mb-4" id="question-@(i + 1)"
+                         style="@(i > 0 ? "display:none;" : "")">
+                        <h5>Question @(i + 1) of @questions.Count</h5>
+                        <p class="lead">@question.QuestionText</p>
+
+                        <div class="options">
+                            @foreach (var option in question.Options ?? new List<PWALMS.Models.Option>())
+                            {
+                                <div class="form-check mb-2">
+                                    <input class="form-check-input" type="radio"
+                                           name="question_@question.QuestionID"
+                                           id="option_@option.OptionID"
+                                           value="@option.OptionID"
+                                           onclick="submitAnswer(@attemptId, @question.QuestionID, @option.OptionID)">
+                                    <label class="form-check-label" for="option_@option.OptionID">
+                                        @option.OptionText
+                                    </label>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                }
+
+                <div class="d-flex justify-content-between mt-4">
+                    <button type="button" class="btn btn-secondary" onclick="prevQuestion()"
+                            id="prevBtn" style="display:none;">
+                        <i class="fas fa-arrow-left"></i> Previous
+                    </button>
+
+                    <button type="button" class="btn btn-primary" onclick="nextQuestion()"
+                            id="nextBtn">
+                        Next <i class="fas fa-arrow-right"></i>
+                    </button>
+                </div>
+            </form>
+
+            <div class="mt-4">
+                <button type="button" class="btn btn-success btn-lg w-100"
+                        onclick="submitQuiz(@attemptId)">
+                    <i class="fas fa-paper-plane"></i> Submit Quiz
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // Quiz navigation
+        let currentQuestion = 1;
+        const totalQuestions = @questions.Count;
+
+        function showQuestion(questionNumber) {
+            // Hide all questions
+            for (let i = 1; i <= totalQuestions; i++) {
+                const questionEl = document.getElementById(`question-${i}`);
+                if (questionEl) {
+                    questionEl.style.display = 'none';
+                }
+            }
+
+            // Show selected question
+            const questionEl = document.getElementById(`question-${questionNumber}`);
+            if (questionEl) {
+                questionEl.style.display = 'block';
+            }
+
+            // Update navigation buttons
+            const prevBtn = document.getElementById('prevBtn');
+            const nextBtn = document.getElementById('nextBtn');
+
+            if (prevBtn) {
+                prevBtn.style.display = questionNumber > 1 ? 'block' : 'none';
+            }
+
+            if (nextBtn) {
+                nextBtn.style.display = questionNumber < totalQuestions ? 'block' : 'none';
+            }
+
+            currentQuestion = questionNumber;
+        }
+
+        function nextQuestion() {
+            if (currentQuestion < totalQuestions) {
+                showQuestion(currentQuestion + 1);
+            }
+        }
+
+        function prevQuestion() {
+            if (currentQuestion > 1) {
+                showQuestion(currentQuestion - 1);
+            }
+        }
+
+        // Timer functionality
+        function startTimer(minutes) {
+            let time = minutes * 60;
+            const timerElement = document.getElementById('quizTimer');
+            const progressBar = document.getElementById('timerProgress');
+            const totalTime = time;
+
+            if (!timerElement || !progressBar) return;
+
+            const timer = setInterval(function() {
+                const minutesLeft = Math.floor(time / 60);
+                let secondsLeft = time % 60;
+
+                secondsLeft = secondsLeft < 10 ? '0' + secondsLeft : secondsLeft;
+                timerElement.textContent = `${minutesLeft}:${secondsLeft}`;
+
+                // Update progress
+                const progress = (time / totalTime) * 100;
+                progressBar.style.width = progress + '%';
+
+                // Warning colors
+                if (time <= 60) {
+                    progressBar.className = 'progress-bar bg-danger';
+                    timerElement.classList.add('text-danger');
+                } else if (time <= 300) {
+                    progressBar.className = 'progress-bar bg-warning';
+                    timerElement.classList.add('text-warning');
+                } else {
+                    progressBar.className = 'progress-bar bg-info';
+                    timerElement.classList.remove('text-warning', 'text-danger');
+                }
+
+                if (time <= 0) {
+                    clearInterval(timer);
+                    alert('Time is up! Submitting quiz...');
+                    submitQuiz(@attemptId);
+                }
+
+                time--;
+            }, 1000);
+        }
+
+        // Start timer
+        startTimer(@timeLimit);
+
+        // Submit answer function
+        function submitAnswer(attemptId, questionId, optionId) {
+            fetch('/Quiz/SubmitAnswer', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    attemptId: attemptId,
+                    questionId: questionId,
+                    optionId: optionId
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Mark option as selected
+                    const optionLabel = document.querySelector(`label[for="option_${optionId}"]`);
+                    if (optionLabel) {
+                        // Remove selected class from all options in this question
+                        const questionOptions = optionLabel.closest('.question-box').querySelectorAll('.form-check-label');
+                        questionOptions.forEach(label => {
+                            label.classList.remove('selected');
+                        });
+
+                        // Add selected class to chosen option
+                        optionLabel.classList.add('selected');
+                    }
+                }
+            })
+            .catch(error => console.error('Error:', error));
+        }
+
+        // Submit quiz function
+        function submitQuiz(attemptId) {
+            if (confirm('Are you sure you want to submit the quiz?')) {
+                // Create a form and submit it
+                const form = document.createElement('form');
+                form.method = 'POST';
+                form.action = '/Quiz/Finish';
+
+                const input = document.createElement('input');
+                input.type = 'hidden';
+                input.name = 'attemptId';
+                input.value = attemptId;
+                form.appendChild(input);
+
+                document.body.appendChild(form);
+                form.submit();
+            }
+        }
+
+        // Initialize first question
+        showQuestion(1);
+
+        // Add CSS for selected option
+        const style = document.createElement('style');
+        style.textContent = `
+            .form-check-label.selected {
+                background-color: #cfe2ff;
+                border-radius: 4px;
+                padding: 5px;
+            }
+        `;
+        document.head.appendChild(style);
+    </script>
+}

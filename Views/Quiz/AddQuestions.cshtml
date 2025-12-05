@@ -1,0 +1,113 @@
+﻿@{
+    ViewData["Title"] = "Add Questions";
+    var quiz = ViewBag.Quiz as PWALMS.Models.Quiz;
+}
+
+<div class="container">
+    <h2>Add Questions to: @quiz?.QuizTitle</h2>
+
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success">@TempData["Success"]</div>
+    }
+
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h5>Add New Question</h5>
+                </div>
+                <div class="card-body">
+                    <form asp-action="AddQuestion" method="post">
+                        <input type="hidden" name="QuizID" value="@quiz?.QuizID" />
+
+                        <div class="mb-3">
+                            <label class="form-label">Question Text</label>
+                            <textarea name="QuestionText" class="form-control" rows="3" required></textarea>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Question Type</label>
+                            <select name="QuestionType" class="form-select">
+                                <option value="MCQ">Multiple Choice</option>
+                                <option value="TrueFalse">True/False</option>
+                            </select>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Marks</label>
+                            <input type="number" name="Marks" class="form-control" step="0.5" min="0.5" max="10" value="1" required>
+                        </div>
+
+                        <h6>Options (Mark correct option)</h6>
+                        <div class="row">
+                            <div class="col-md-6 mb-2">
+                                <div class="input-group">
+                                    <div class="input-group-text">
+                                        <input class="form-check-input" type="radio" name="CorrectOption" value="1" checked>
+                                    </div>
+                                    <input type="text" name="Option1" class="form-control" placeholder="Option 1" required>
+                                </div>
+                            </div>
+
+                            <div class="col-md-6 mb-2">
+                                <div class="input-group">
+                                    <div class="input-group-text">
+                                        <input class="form-check-input" type="radio" name="CorrectOption" value="2">
+                                    </div>
+                                    <input type="text" name="Option2" class="form-control" placeholder="Option 2" required>
+                                </div>
+                            </div>
+
+                            <div class="col-md-6 mb-2">
+                                <div class="input-group">
+                                    <div class="input-group-text">
+                                        <input class="form-check-input" type="radio" name="CorrectOption" value="3">
+                                    </div>
+                                    <input type="text" name="Option3" class="form-control" placeholder="Option 3">
+                                </div>
+                            </div>
+
+                            <div class="col-md-6 mb-2">
+                                <div class="input-group">
+                                    <div class="input-group-text">
+                                        <input class="form-check-input" type="radio" name="CorrectOption" value="4">
+                                    </div>
+                                    <input type="text" name="Option4" class="form-control" placeholder="Option 4">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mt-3">
+                            <button type="submit" class="btn btn-primary">Add Question</button>
+                            <a asp-action="Manage" class="btn btn-secondary">Finish & Go Back</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5>Quiz Info</h5>
+                </div>
+                <div class="card-body">
+                    <p><strong>Title:</strong> @quiz?.QuizTitle</p>
+                    <p><strong>Department:</strong> @quiz?.Department?.DepartmentName</p>
+                    <p><strong>Time Limit:</strong> @quiz?.TimeLimitMinutes minutes</p>
+                    <p><strong>Questions Added:</strong> @quiz?.TotalQuestions</p>
+                    <p><strong>Total Marks:</strong> @quiz?.TotalMarks</p>
+
+                    <div class="mt-3">
+                        <a asp-action="Publish" asp-route-id="@quiz?.QuizID"
+                           class="btn btn-success w-100"
+                           onclick="return confirm('Are you sure you want to publish this quiz?')">
+                            Publish Quiz
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

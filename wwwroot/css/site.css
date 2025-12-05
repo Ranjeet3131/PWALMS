@@ -1,0 +1,57 @@
+/* Custom styles */
+body {
+    background-color: #f8f9fa;
+}
+
+.card {
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    border: none;
+    margin-bottom: 20px;
+}
+
+.card-header {
+    font-weight: 600;
+}
+
+.table th {
+    font-weight: 600;
+    background-color: #f8f9fa;
+}
+
+.btn {
+    border-radius: 4px;
+}
+
+.alert {
+    border-radius: 4px;
+}
+
+.timer {
+    font-family: 'Courier New', monospace;
+    font-weight: bold;
+    font-size: 1.2em;
+}
+
+.question-box {
+    background-color: #fff;
+    border-left: 4px solid #007bff;
+    padding: 15px;
+    margin-bottom: 15px;
+    border-radius: 0 5px 5px 0;
+}
+
+.option-label {
+    display: block;
+    padding: 10px 15px;
+    margin-bottom: 8px;
+    background-color: #f8f9fa;
+    border: 1px solid #dee2e6;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+    .option-label:hover {
+        background-color: #e9ecef;
+        border-color: #007bff;
+    }

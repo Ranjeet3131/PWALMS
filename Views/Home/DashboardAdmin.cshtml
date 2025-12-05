@@ -1,0 +1,91 @@
+﻿@{
+    ViewData["Title"] = "Admin Dashboard";
+}
+
+<div class="container-fluid">
+    <h2>Admin Dashboard</h2>
+
+    <div class="row mt-4">
+        <div class="col-md-3 mb-3">
+            <div class="card text-white bg-primary">
+                <div class="card-body">
+                    <h5 class="card-title">Total Users</h5>
+                    <h2>@ViewBag.TotalUsers</h2>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3 mb-3">
+            <div class="card text-white bg-success">
+                <div class="card-body">
+                    <h5 class="card-title">Active Quizzes</h5>
+                    <h2>@ViewBag.TotalQuizzes</h2>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3 mb-3">
+            <div class="card text-white bg-warning">
+                <div class="card-body">
+                    <h5 class="card-title">Quiz Attempts</h5>
+                    <h2>@ViewBag.TotalAttempts</h2>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3 mb-3">
+            <div class="card text-white bg-info">
+                <div class="card-body">
+                    <h5 class="card-title">Departments</h5>
+                    <h2>5</h2>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mt-4">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5>Recent Quiz Attempts</h5>
+                </div>
+                <div class="card-body">
+                    @if (ViewBag.RecentAttempts != null && ViewBag.RecentAttempts.Count > 0)
+                    {
+                        <div class="table-responsive">
+                            <table class="table table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>User</th>
+                                        <th>Quiz</th>
+                                        <th>Score</th>
+                                        <th>Time Taken</th>
+                                        <th>Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var attempt in ViewBag.RecentAttempts)
+                                    {
+                                        <tr>
+                                            <td>@attempt.User?.FullName</td>
+                                            <td>@attempt.Quiz?.QuizTitle</td>
+                                            <td>@attempt.Score/@attempt.MaxScore</td>
+                                            <td>@attempt.TimeTakenMinutes min</td>
+                                            <td>
+                                                <span class="badge bg-success">@attempt.Status</span>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                    else
+                    {
+                        <p>No quiz attempts yet.</p>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

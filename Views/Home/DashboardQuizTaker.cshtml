@@ -1,0 +1,73 @@
+﻿@{
+    ViewData["Title"] = "Quiz Taker Dashboard";
+}
+
+<div class="container">
+    <h2>Welcome, Quiz Taker!</h2>
+
+    <div class="row mt-4">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h5>Available Quizzes</h5>
+                </div>
+                <div class="card-body">
+                    @if (ViewBag.AvailableQuizzes != null && ViewBag.AvailableQuizzes.Count > 0)
+                    {
+                        <div class="row">
+                            @foreach (var quiz in ViewBag.AvailableQuizzes)
+                            {
+                                <div class="col-md-6 mb-3">
+                                    <div class="card quiz-card">
+                                        <div class="card-body">
+                                            <h5 class="card-title">@quiz.QuizTitle</h5>
+                                            <p class="card-text">@quiz.Description</p>
+                                            <p><small>Department: @quiz.Department?.DepartmentName</small></p>
+                                            <p><small>Time Limit: @quiz.TimeLimitMinutes minutes</small></p>
+                                            <p><small>Questions: @quiz.TotalQuestions</small></p>
+                                            <a href="@Url.Action("Take", "Quiz", new { id = quiz.QuizID })"
+                                               class="btn btn-primary">Take Quiz</a>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="alert alert-info">
+                            No quizzes available for your department at the moment.
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5>My Quiz History</h5>
+                </div>
+                <div class="card-body">
+                    @if (ViewBag.UserAttempts != null && ViewBag.UserAttempts.Count > 0)
+                    {
+                        <div class="list-group">
+                            @foreach (var attempt in ViewBag.UserAttempts)
+                            {
+                                <div class="list-group-item">
+                                    <h6>@attempt.Quiz?.QuizTitle</h6>
+                                    <p>Score: @attempt.Score/@attempt.MaxScore (@attempt.Percentage.ToString("0.00")%)</p>
+                                    <small>Completed: @attempt.EndTime?.ToString("yyyy-MM-dd HH:mm")</small>
+                                </div>
+                            }
+                        </div>
+                    }
+                    else
+                    {
+                        <p>No quiz attempts yet.</p>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

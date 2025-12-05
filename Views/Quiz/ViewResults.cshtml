@@ -1,0 +1,58 @@
+﻿@model List<PWALMS.Models.QuizAttempt>
+@{
+    ViewData["Title"] = "Quiz Results";
+    var quiz = ViewBag.Quiz as PWALMS.Models.Quiz;
+}
+
+<div class="container">
+    <h2>Results for: @quiz?.QuizTitle</h2>
+
+    <div class="mb-3">
+        <a asp-action="Export" asp-route-id="@quiz?.QuizID" class="btn btn-success">
+            <i class="fas fa-file-excel"></i> Export to Excel
+        </a>
+        <a asp-action="Manage" class="btn btn-secondary">Back to Quiz List</a>
+    </div>
+
+    <div class="table-responsive">
+        <table class="table table-striped table-hover">
+            <thead class="table-dark">
+                <tr>
+                    <th>Rank</th>
+                    <th>User</th>
+                    <th>Department</th>
+                    <th>Score</th>
+                    <th>Percentage</th>
+                    <th>Time Taken</th>
+                    <th>Completion Time</th>
+                </tr>
+            </thead>
+            <tbody>
+                @for (int i = 0; i < Model.Count; i++)
+                {
+                    var attempt = Model[i];
+                    <tr>
+                        <td>@(i + 1)</td>
+                        <td>@attempt.User?.FullName</td>
+                        <td>@attempt.User?.Department?.DepartmentName</td>
+                        <td>@attempt.Score/@attempt.MaxScore</td>
+                        <td>
+                            <span class="badge bg-@(attempt.Percentage >= 70 ? "success" : attempt.Percentage >= 50 ? "warning" : "danger")">
+                                @attempt.Percentage.ToString("0.00")%
+                            </span>
+                        </td>
+                        <td>@attempt.TimeTakenMinutes minutes</td>
+                        <td>@attempt.EndTime?.ToString("yyyy-MM-dd HH:mm")</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+
+    @if (!Model.Any())
+    {
+        <div class="alert alert-info">
+            No results available for this quiz yet.
+        </div>
+    }
+</div>
