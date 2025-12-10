@@ -32,6 +32,14 @@ namespace PWALMS.Controllers
 
             ViewBag.User = user;
 
+            // Get recent announcements
+            ViewBag.RecentAnnouncements = _context.Announcements
+                .Include(a => a.CreatedBy)
+                .Where(a => a.IsActive && (!a.ExpiryDate.HasValue || a.ExpiryDate >= DateTime.Now))
+                .OrderByDescending(a => a.CreatedDate)
+                .Take(5)
+                .ToList();
+
             if (_authService.IsAdmin() || _authService.IsUploader())
             {
                 // Admin/Uploader dashboard
@@ -55,15 +63,28 @@ namespace PWALMS.Controllers
                 var availableQuizzes = _quizService.GetQuizzesByDepartment(user.DepartmentID);
                 ViewBag.AvailableQuizzes = availableQuizzes;
 
-                // Get ALL user attempts (completed and in-progress)
-                ViewBag.UserAttempts = _context.QuizAttempts
+                var userAttempts = _context.QuizAttempts
                     .Include(a => a.Quiz)
                     .Where(a => a.UserID == user.UserID)
                     .OrderByDescending(a => a.EndTime)
                     .ToList();
 
+                ViewBag.UserAttempts = userAttempts;
+
+                // User performance (only for display, not shown to user)
+                ViewBag.UserStats = new
+                {
+                    TotalQuizzesTaken = userAttempts.Count(a => a.Status == "Completed"),
+                    AverageScore = userAttempts
+                        .Where(a => a.Status == "Completed")
+                        .Average(a => (decimal?)a.Percentage) ?? 0,
+                    BestScore = userAttempts
+                        .Where(a => a.Status == "Completed")
+                        .Max(a => (decimal?)a.Percentage) ?? 0
+                };
+
                 return View("DashboardQuizTaker");
             }
-        }
+    }
     }
 }

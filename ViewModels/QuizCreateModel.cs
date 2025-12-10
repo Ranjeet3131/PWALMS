@@ -14,6 +14,12 @@ namespace PWALMS.ViewModels
         [Display(Name = "Department")]
         public int DepartmentID { get; set; }
 
+        // For multi-select UI (not saved to database yet)
+        public List<int> SelectedDepartmentIds { get; set; } = new List<int>();
+
+        [Display(Name = "Category (optional)")]
+        public int? CategoryID { get; set; }
+
         [Required]
         [Range(1, 300)]
         [Display(Name = "Time Limit (minutes)")]

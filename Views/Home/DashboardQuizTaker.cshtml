@@ -1,5 +1,7 @@
 ﻿@{
     ViewData["Title"] = "Quiz Taker Dashboard";
+    var availableQuizzes = ViewBag.AvailableQuizzes as List<PWALMS.Models.Quiz> ?? new List<PWALMS.Models.Quiz>();
+    var userAttempts = ViewBag.UserAttempts as List<PWALMS.Models.QuizAttempt> ?? new List<PWALMS.Models.QuizAttempt>();
 }
 
 <div class="container">
@@ -12,21 +14,46 @@
                     <h5>Available Quizzes</h5>
                 </div>
                 <div class="card-body">
-                    @if (ViewBag.AvailableQuizzes != null && ViewBag.AvailableQuizzes.Count > 0)
+                    @if (availableQuizzes.Any())
                     {
                         <div class="row">
-                            @foreach (var quiz in ViewBag.AvailableQuizzes)
+                            @foreach (var quiz in availableQuizzes)
                             {
+                                var userAttempt = userAttempts.FirstOrDefault(a => a.QuizID == quiz.QuizID);
+
                                 <div class="col-md-6 mb-3">
                                     <div class="card quiz-card">
                                         <div class="card-body">
                                             <h5 class="card-title">@quiz.QuizTitle</h5>
-                                            <p class="card-text">@quiz.Description</p>
+                                            <p class="card-text">@(string.IsNullOrEmpty(quiz.Description) ? "No description" : quiz.Description)</p>
                                             <p><small>Department: @quiz.Department?.DepartmentName</small></p>
                                             <p><small>Time Limit: @quiz.TimeLimitMinutes minutes</small></p>
                                             <p><small>Questions: @quiz.TotalQuestions</small></p>
-                                            <a href="@Url.Action("Take", "Quiz", new { id = quiz.QuizID })"
-                                               class="btn btn-primary">Take Quiz</a>
+
+                                            @if (userAttempt != null && userAttempt.Status == "Completed")
+                                            {
+                                                <div class="alert alert-info p-2 mb-2">
+                                                    <small><i class="fas fa-check-circle"></i> Already Completed</small>
+                                                </div>
+                                                <a href="@Url.Action("Results", "Quiz", new { id = userAttempt.AttemptID })"
+                                                   class="btn btn-outline-info btn-sm">
+                                                    View Submission
+                                                </a>
+                                            }
+                                            else if (userAttempt != null && userAttempt.Status == "InProgress")
+                                            {
+                                                <a href="@Url.Action("Take", "Quiz", new { id = quiz.QuizID })"
+                                                   class="btn btn-warning">
+                                                    Continue Quiz
+                                                </a>
+                                            }
+                                            else
+                                            {
+                                                <a href="@Url.Action("Take", "Quiz", new { id = quiz.QuizID })"
+                                                   class="btn btn-primary">
+                                                    Take Quiz
+                                                </a>
+                                            }
                                         </div>
                                     </div>
                                 </div>
@@ -49,22 +76,45 @@
                     <h5>My Quiz History</h5>
                 </div>
                 <div class="card-body">
-                    @if (ViewBag.UserAttempts != null && ViewBag.UserAttempts.Count > 0)
+                    @if (userAttempts.Any(a => a.Status == "Completed"))
                     {
                         <div class="list-group">
-                            @foreach (var attempt in ViewBag.UserAttempts)
+                            @foreach (var attempt in userAttempts.Where(a => a.Status == "Completed").Take(5))
                             {
                                 <div class="list-group-item">
                                     <h6>@attempt.Quiz?.QuizTitle</h6>
-                                    <p>Score: @attempt.Score/@attempt.MaxScore (@attempt.Percentage.ToString("0.00")%)</p>
-                                    <small>Completed: @attempt.EndTime?.ToString("yyyy-MM-dd HH:mm")</small>
+                                    <p>Submitted: @attempt.EndTime?.ToString("yyyy-MM-dd HH:mm")</p>
+                                    <small>Status: <span class="badge bg-success">Completed</span></small>
+                                    <div class="mt-2">
+                                        <a href="@Url.Action("Results", "Quiz", new { id = attempt.AttemptID })"
+                                           class="btn btn-sm btn-outline-primary">
+                                            View Details
+                                        </a>
+                                    </div>
                                 </div>
                             }
                         </div>
                     }
                     else
                     {
-                        <p>No quiz attempts yet.</p>
+                        <p>No completed quizzes yet.</p>
+                    }
+
+                    @if (userAttempts.Any(a => a.Status == "InProgress"))
+                    {
+                        <div class="mt-3">
+                            <h6>In Progress</h6>
+                            @foreach (var attempt in userAttempts.Where(a => a.Status == "InProgress"))
+                            {
+                                <div class="alert alert-warning p-2 mb-2">
+                                    <small><i class="fas fa-clock"></i> @attempt.Quiz?.QuizTitle</small>
+                                    <a href="@Url.Action("Take", "Quiz", new { id = attempt.QuizID })"
+                                       class="btn btn-sm btn-warning float-end">
+                                        Continue
+                                    </a>
+                                </div>
+                            }
+                        </div>
                     }
                 </div>
             </div>

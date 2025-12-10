@@ -1,0 +1,112 @@
+﻿@model PWALMS.ViewModels.UserEditModel
+@{
+    ViewData["Title"] = "Edit User";
+
+    // Determine if username should be readonly
+    var isReadonly = Model?.Username == "admin";
+}
+
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h4 class="mb-0"><i class="fas fa-edit"></i> Edit User</h4>
+            </div>
+            <div class="card-body">
+                <form asp-action="Edit" method="post">
+                    <input type="hidden" asp-for="UserID" />
+
+                    <div class="mb-3">
+                        <label asp-for="Username" class="form-label"></label>
+                        @if (isReadonly)
+                        {
+                            <input asp-for="Username" class="form-control" readonly>
+                        }
+                        else
+                        {
+                            <input asp-for="Username" class="form-control">
+                        }
+                        <span asp-validation-for="Username" class="text-danger"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="NewPassword" class="form-label"></label>
+                        <input asp-for="NewPassword" type="password" class="form-control">
+                        <small class="text-muted">Leave blank to keep current password</small>
+                        <span asp-validation-for="NewPassword" class="text-danger"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="FullName" class="form-label"></label>
+                        <input asp-for="FullName" class="form-control">
+                        <span asp-validation-for="FullName" class="text-danger"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="Email" class="form-label"></label>
+                        <input asp-for="Email" type="email" class="form-control">
+                        <span asp-validation-for="Email" class="text-danger"></span>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="DepartmentID" class="form-label"></label>
+                            <select asp-for="DepartmentID" class="form-select">
+                                <option value="">-- Select Department --</option>
+                                @if (ViewBag.Departments != null)
+                                {
+                                    foreach (var dept in ViewBag.Departments)
+                                    {
+                                        var isSelected = Model?.DepartmentID == dept.DepartmentID;
+                                        <option value="@dept.DepartmentID" selected="@isSelected">
+                                            @dept.DepartmentName
+                                        </option>
+                                    }
+                                }
+                            </select>
+                            <span asp-validation-for="DepartmentID" class="text-danger"></span>
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="RoleID" class="form-label"></label>
+                            <select asp-for="RoleID" class="form-select">
+                                <option value="">-- Select Role --</option>
+                                @if (ViewBag.Roles != null)
+                                {
+                                    foreach (var role in ViewBag.Roles)
+                                    {
+                                        var isSelected = Model?.RoleID == role.RoleID;
+                                        <option value="@role.RoleID" selected="@isSelected">
+                                            @role.RoleName
+                                        </option>
+                                    }
+                                }
+                            </select>
+                            <span asp-validation-for="RoleID" class="text-danger"></span>
+                        </div>
+                    </div>
+
+                    <div class="mb-3 form-check">
+                        <input asp-for="IsActive" class="form-check-input" checked="@(Model?.IsActive ?? false)">
+                        <label asp-for="IsActive" class="form-check-label"></label>
+                    </div>
+
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save"></i> Update User
+                        </button>
+                        <a asp-action="Users" class="btn btn-secondary">
+                            <i class="fas fa-arrow-left"></i> Back to Users
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

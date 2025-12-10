@@ -9,21 +9,25 @@ namespace PWALMS.Models
         public int QuizID { get; set; }
 
         [StringLength(20)]
-        public string QuizCode { get; set; } = "";
+        public string? QuizCode { get; set; }
 
         [Required]
         [StringLength(200)]
         public string QuizTitle { get; set; } = "";
 
-        public string Description { get; set; } = "";
+        public string? Description { get; set; }
 
         [ForeignKey("Department")]
         public int DepartmentID { get; set; }
-        public virtual Department Department { get; set; }
+        public virtual Department? Department { get; set; }
 
         [ForeignKey("CreatedByUser")]
         public int CreatedBy { get; set; }
-        public virtual User CreatedByUser { get; set; }
+        public virtual User? CreatedByUser { get; set; }
+
+        [ForeignKey("Category")]
+        public int? CategoryID { get; set; }
+        public virtual QuizCategory? Category { get; set; }
 
         [Required]
         [Range(1, 300)]
@@ -42,9 +46,8 @@ namespace PWALMS.Models
 
         public DateTime CreatedDate { get; set; } = DateTime.Now;
 
-        // Navigation properties
-        public virtual ICollection<Question> Questions { get; set; }
-        public virtual ICollection<QuizAttempt> Attempts { get; set; }
+        public virtual ICollection<Question>? Questions { get; set; }
+        public virtual ICollection<QuizAttempt>? Attempts { get; set; }
     }
 
     public class Question
@@ -54,7 +57,7 @@ namespace PWALMS.Models
 
         [ForeignKey("Quiz")]
         public int QuizID { get; set; }
-        public virtual Quiz Quiz { get; set; }
+        public virtual Quiz? Quiz { get; set; }
 
         [Required]
         public string QuestionText { get; set; } = "";
@@ -68,8 +71,7 @@ namespace PWALMS.Models
 
         public int SortOrder { get; set; } = 0;
 
-        // Navigation property
-        public virtual ICollection<Option> Options { get; set; }
+        public virtual ICollection<Option>? Options { get; set; }
     }
 
     public class Option
@@ -79,7 +81,7 @@ namespace PWALMS.Models
 
         [ForeignKey("Question")]
         public int QuestionID { get; set; }
-        public virtual Question Question { get; set; }
+        public virtual Question? Question { get; set; }
 
         [Required]
         public string OptionText { get; set; } = "";
@@ -95,11 +97,11 @@ namespace PWALMS.Models
 
         [ForeignKey("Quiz")]
         public int QuizID { get; set; }
-        public virtual Quiz Quiz { get; set; }
+        public virtual Quiz? Quiz { get; set; }
 
         [ForeignKey("User")]
         public int UserID { get; set; }
-        public virtual User User { get; set; }
+        public virtual User? User { get; set; }
 
         public DateTime StartTime { get; set; } = DateTime.Now;
         public DateTime? EndTime { get; set; }
@@ -117,32 +119,6 @@ namespace PWALMS.Models
         [StringLength(20)]
         public string Status { get; set; } = "InProgress";
 
-        // Navigation property
-        public virtual ICollection<UserAnswer> Answers { get; set; }
-    }
-
-    public class UserAnswer
-    {
-        [Key]
-        public int AnswerID { get; set; }
-
-        [ForeignKey("QuizAttempt")]
-        public int AttemptID { get; set; }
-        public virtual QuizAttempt QuizAttempt { get; set; }
-
-        [ForeignKey("Question")]
-        public int QuestionID { get; set; }
-        public virtual Question Question { get; set; }
-
-        [ForeignKey("SelectedOption")]
-        public int? SelectedOptionID { get; set; }
-        public virtual Option SelectedOption { get; set; }
-
-        public bool IsCorrect { get; set; } = false;
-
-        [Column(TypeName = "decimal(10,2)")]
-        public decimal MarksObtained { get; set; } = 0;
-
-        public DateTime AnsweredTime { get; set; } = DateTime.Now;
+        public virtual ICollection<UserAnswer>? Answers { get; set; }
     }
 }

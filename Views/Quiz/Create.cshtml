@@ -37,6 +37,18 @@
                         </div>
 
                         <div class="col-md-6 mb-3">
+                            <label asp-for="CategoryID" class="form-label"></label>
+                            <select asp-for="CategoryID" class="form-select">
+                                <option value="">-- Select Category (optional) --</option>
+                                @foreach (var category in ViewBag.Categories)
+                                {
+                                    <option value="@category.CategoryID">@category.CategoryName</option>
+                                }
+                            </select>
+                            <span asp-validation-for="CategoryID" class="text-danger"></span>
+                        </div>
+
+                        <div class="col-md-6 mb-3">
                             <label asp-for="TimeLimitMinutes" class="form-label"></label>
                             <input asp-for="TimeLimitMinutes" type="number" class="form-control" min="1" max="300">
                             <span asp-validation-for="TimeLimitMinutes" class="text-danger"></span>

@@ -18,12 +18,15 @@ namespace PWALMS.Data
         public DbSet<Option> Options { get; set; }
         public DbSet<QuizAttempt> QuizAttempts { get; set; }
         public DbSet<UserAnswer> UserAnswers { get; set; }
+        public DbSet<Announcement> Announcements { get; set; }
+        public DbSet<QuizCategory> QuizCategories { get; set; }
+     
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
 
-            // For SQLite, convert decimal to double
+            // Simple configuration - no complex foreign keys for now
             modelBuilder.Entity<Quiz>()
                 .Property(q => q.TotalMarks)
                 .HasConversion<double>();

@@ -25,19 +25,18 @@ namespace PWALMS.Models
 
         [ForeignKey("Department")]
         public int? DepartmentID { get; set; }
-        public virtual Department Department { get; set; }
+        public virtual Department? Department { get; set; }
 
         [ForeignKey("Role")]
         public int RoleID { get; set; }
-        public virtual Role Role { get; set; }
+        public virtual Role? Role { get; set; }
 
         public bool IsActive { get; set; } = true;
         public DateTime CreatedDate { get; set; } = DateTime.Now;
         public DateTime? LastLogin { get; set; }
 
-        // Navigation properties
-        public virtual ICollection<Quiz> CreatedQuizzes { get; set; }
-        public virtual ICollection<QuizAttempt> QuizAttempts { get; set; }
+        public virtual ICollection<Quiz>? CreatedQuizzes { get; set; }
+        public virtual ICollection<QuizAttempt>? QuizAttempts { get; set; }
     }
 
     public class Role
@@ -50,7 +49,7 @@ namespace PWALMS.Models
         public string RoleName { get; set; } = "";
 
         [StringLength(200)]
-        public string Description { get; set; } = "";
+        public string? Description { get; set; }
     }
 
     public class Department
@@ -63,6 +62,6 @@ namespace PWALMS.Models
         public string DepartmentName { get; set; } = "";
 
         [StringLength(10)]
-        public string DepartmentCode { get; set; } = "";
+        public string? DepartmentCode { get; set; }
     }
 }

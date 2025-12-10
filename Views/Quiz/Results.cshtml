@@ -1,6 +1,7 @@
 ﻿@model PWALMS.Models.QuizAttempt
 @{
     ViewData["Title"] = "Quiz Results";
+    bool isQuizTaker = ViewBag.IsQuizTaker as bool? ?? false;
 }
 
 <div class="container">
@@ -11,60 +12,74 @@
         <div class="card-body">
             <h3>@Model.Quiz?.QuizTitle</h3>
 
-            <div class="row mt-4">
-                <div class="col-md-6">
-                    <div class="card mb-3">
-                        <div class="card-body">
-                            <h5>Your Score</h5>
-                            <h1 class="display-4">@Model.Score/@Model.MaxScore</h1>
-                            <h3 class="@(Model.Percentage >= 70 ? "text-success" : Model.Percentage >= 50 ? "text-warning" : "text-danger")">
-                                @Model.Percentage.ToString("0.00")%
-                            </h3>
+            @if (!isQuizTaker)
+            {
+                <div class="row mt-4">
+                    <div class="col-md-6">
+                        <div class="card mb-3">
+                            <div class="card-body">
+                                <h5>Your Score</h5>
+                                <h1 class="display-4">@Model.Score/@Model.MaxScore</h1>
+                                <h3 class="@(Model.Percentage >= 70 ? "text-success" : Model.Percentage >= 50 ? "text-warning" : "text-danger")">
+                                    @Model.Percentage.ToString("0.00")%
+                                </h3>
+                            </div>
                         </div>
                     </div>
-                </div>
 
-                <div class="col-md-6">
-                    <div class="card mb-3">
-                        <div class="card-body">
-                            <h5>Quiz Details</h5>
-                            <p><strong>Time Taken:</strong> @Model.TimeTakenMinutes minutes</p>
-                            <p><strong>Started:</strong> @Model.StartTime.ToString("yyyy-MM-dd HH:mm")</p>
-                            <p><strong>Completed:</strong> @Model.EndTime?.ToString("yyyy-MM-dd HH:mm")</p>
-                            <p><strong>Status:</strong> <span class="badge bg-success">@Model.Status</span></p>
+                    <div class="col-md-6">
+                        <div class="card mb-3">
+                            <div class="card-body">
+                                <h5>Quiz Details</h5>
+                                <p><strong>Time Taken:</strong> @Model.TimeTakenMinutes minutes</p>
+                                <p><strong>Started:</strong> @Model.StartTime.ToString("yyyy-MM-dd HH:mm")</p>
+                                <p><strong>Completed:</strong> @Model.EndTime?.ToString("yyyy-MM-dd HH:mm")</p>
+                                <p><strong>Status:</strong> <span class="badge bg-success">@Model.Status</span></p>
+                            </div>
                         </div>
                     </div>
                 </div>
-            </div>
+            }
+            else
+            {
+                <div class="alert alert-info mt-4">
+                    <h5><i class="fas fa-info-circle"></i> Results Submitted</h5>
+                    <p>Your quiz has been submitted successfully. The trainer will review your answers and provide feedback.</p>
+                    <p><strong>Submission Time:</strong> @Model.EndTime?.ToString("yyyy-MM-dd HH:mm")</p>
+                </div>
+            }
 
             <h4 class="mt-4">Question Review</h4>
             <div class="questions-review">
                 @foreach (var answer in Model.Answers ?? new List<PWALMS.Models.UserAnswer>())
                 {
                     var question = answer.Question;
-                    <div class="card mb-3 @(answer.IsCorrect ? "border-success" : "border-danger")">
+                    <div class="card mb-3 border-@(answer.IsCorrect ? "success" : "danger")">
                         <div class="card-header @(answer.IsCorrect ? "bg-success text-white" : "bg-danger text-white")">
                             <h5 class="mb-0">Question</h5>
                         </div>
                         <div class="card-body">
                             <p class="lead">@question?.QuestionText</p>
                             <p><strong>Your Answer:</strong> @answer.SelectedOption?.OptionText</p>
-                            <p>
-                                <strong>Correct Answer:</strong>
-                                @(question?.Options?.FirstOrDefault(o => o.IsCorrect)?.OptionText ?? "N/A")
-                            </p>
-                            <p><strong>Marks:</strong> @answer.MarksObtained/@question?.Marks</p>
-                            <p>
-                                <strong>Status:</strong>
-                                @if (answer.IsCorrect)
-                                {
-                                    <span class="badge bg-success">Correct</span>
-                                }
-                                else
-                                {
-                                    <span class="badge bg-danger">Incorrect</span>
-                                }
-                            </p>
+                            @if (!isQuizTaker)
+                            {
+                                <p>
+                                    <strong>Correct Answer:</strong>
+                                    @(question?.Options?.FirstOrDefault(o => o.IsCorrect)?.OptionText ?? "N/A")
+                                </p>
+                                <p><strong>Marks:</strong> @answer.MarksObtained/@question?.Marks</p>
+                                <p>
+                                    <strong>Status:</strong>
+                                    @if (answer.IsCorrect)
+                                    {
+                                        <span class="badge bg-success">Correct</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-danger">Incorrect</span>
+                                    }
+                                </p>
+                            }
                         </div>
                     </div>
                 }

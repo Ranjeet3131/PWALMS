@@ -431,12 +431,14 @@ C:\Users\bloodbank7\PWALMS\obj\Debug\net10.0\PWALMS.MvcApplicationPartsAssemblyI
 C:\Users\bloodbank7\PWALMS\obj\Debug\net10.0\PWALMS.MvcApplicationPartsAssemblyInfo.cache
 C:\Users\bloodbank7\PWALMS\obj\Debug\net10.0\PWALMS.RazorAssemblyInfo.cache
 C:\Users\bloodbank7\PWALMS\obj\Debug\net10.0\PWALMS.RazorAssemblyInfo.cs
+C:\Users\bloodbank7\PWALMS\obj\Debug\net10.0\PWALMS.sourcelink.json
 C:\Users\bloodbank7\PWALMS\obj\Debug\net10.0\rjimswa.dswa.cache.json
 C:\Users\bloodbank7\PWALMS\obj\Debug\net10.0\rjsmrazor.dswa.cache.json
 C:\Users\bloodbank7\PWALMS\obj\Debug\net10.0\rjsmcshtml.dswa.cache.json
 C:\Users\bloodbank7\PWALMS\obj\Debug\net10.0\scopedcss\Views\Shared\_Layout.cshtml.rz.scp.css
 C:\Users\bloodbank7\PWALMS\obj\Debug\net10.0\scopedcss\bundle\PWALMS.styles.css
 C:\Users\bloodbank7\PWALMS\obj\Debug\net10.0\scopedcss\projectbundle\PWALMS.bundle.scp.css
+C:\Users\bloodbank7\PWALMS\obj\Debug\net10.0\compressed\asrqcr11mw-{0}-kwoomhdf3c-kwoomhdf3c.gz
 C:\Users\bloodbank7\PWALMS\obj\Debug\net10.0\compressed\qzokf71g4p-{0}-ad3le1kmum-ad3le1kmum.gz
 C:\Users\bloodbank7\PWALMS\obj\Debug\net10.0\compressed\7zatop50b9-{0}-61n19gt1b8-61n19gt1b8.gz
 C:\Users\bloodbank7\PWALMS\obj\Debug\net10.0\compressed\eojj2zothe-{0}-bufkprvprg-bufkprvprg.gz

@@ -1,0 +1,59 @@
+﻿/* Announcement Ticker Styles */
+.announcement-ticker {
+    background: linear-gradient(90deg, #f8f9fa 0%, #e9ecef 100%);
+    border-bottom: 1px solid #dee2e6;
+    overflow: hidden;
+    position: relative;
+    height: 45px;
+}
+
+/* ... rest of the CSS ... */
+
+@keyframes ticker-scroll {
+    0% {
+        transform: translateX(100%);
+    }
+
+    100% {
+        transform: translateX(-100%);
+    }
+}
+
+/* Mobile responsiveness */
+@media (max-width: 768px) {
+    .announcement-ticker {
+        height: 55px;
+    }
+
+    .ticker-container {
+        animation: ticker-scroll 40s linear infinite;
+    }
+
+    .announcement-content {
+        max-width: 200px;
+    }
+
+    .announcement-meta {
+        display: none;
+    }
+
+    .announcement-item {
+        padding: 3px 10px;
+        margin-right: 20px;
+    }
+}
+
+@media (max-width: 576px) {
+    .announcement-content {
+        max-width: 150px;
+    }
+
+    .announcement-title {
+        font-size: 14px;
+    }
+
+    .ticker-label {
+        font-size: 10px;
+        padding: 2px 8px;
+    }
+}

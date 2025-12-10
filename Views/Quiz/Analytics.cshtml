@@ -1,0 +1,141 @@
+﻿@{
+    ViewData["Title"] = "Quiz Analytics";
+    var quiz = ViewBag.Quiz as PWALMS.Models.Quiz;
+    var stats = ViewBag.Stats as PWALMS.ViewModels.QuizStatistics;
+    var questionStats = ViewBag.QuestionStats as List<PWALMS.ViewModels.QuestionStat>;
+    var attempts = ViewBag.Attempts as List<PWALMS.Models.QuizAttempt>;
+}
+
+<div class="container">
+    <h2>Analytics for: @quiz?.QuizTitle</h2>
+
+    <div class="row mt-4">
+        <div class="col-md-3 mb-3">
+            <div class="card text-white bg-primary">
+                <div class="card-body">
+                    <h5 class="card-title">Total Attempts</h5>
+                    <h2>@stats?.TotalAttempts</h2>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3 mb-3">
+            <div class="card text-white bg-success">
+                <div class="card-body">
+                    <h5 class="card-title">Average Score</h5>
+                    <h2>@(stats?.AveragePercentage.ToString("0.00") ?? "0")%</h2>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3 mb-3">
+            <div class="card text-white bg-warning">
+                <div class="card-body">
+                    <h5 class="card-title">Highest Score</h5>
+                    <h2>@(stats?.HighestScore.ToString("0.00") ?? "0")%</h2>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3 mb-3">
+            <div class="card text-white bg-info">
+                <div class="card-body">
+                    <h5 class="card-title">Average Time</h5>
+                    <h2>@(stats?.AverageTime.ToString("0") ?? "0") min</h2>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mt-4">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5>Question Performance</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-sm">
+                            <thead>
+                                <tr>
+                                    <th>Question</th>
+                                    <th>Correct</th>
+                                    <th>Total</th>
+                                    <th>Success Rate</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @if (questionStats != null)
+                                {
+                                    foreach (var qStat in questionStats)
+                                    {
+                                        <tr>
+                                            <td style="max-width: 200px; overflow: hidden; text-overflow: ellipsis;">
+                                                @qStat.QuestionText
+                                            </td>
+                                            <td>@qStat.CorrectAnswers</td>
+                                            <td>@qStat.TotalAnswers</td>
+                                            <td>
+                                                <div class="progress" style="height: 20px;">
+                                                    <div class="progress-bar bg-success"
+                                                         style="width: @qStat.SuccessRate%;">
+                                                        @qStat.SuccessRate.ToString("0.00")%
+                                                    </div>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    }
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5>Recent Attempts</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-sm">
+                            <thead>
+                                <tr>
+                                    <th>User</th>
+                                    <th>Score</th>
+                                    <th>Time</th>
+                                    <th>Date</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @if (attempts != null)
+                                {
+                                    foreach (var attempt in attempts.Take(10))
+                                    {
+                                        <tr>
+                                            <td>@attempt.User?.FullName</td>
+                                            <td>@attempt.Percentage.ToString("0.00")%</td>
+                                            <td>@attempt.TimeTakenMinutes min</td>
+                                            <td>@attempt.EndTime?.ToString("MM/dd HH:mm")</td>
+                                        </tr>
+                                    }
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="mt-4">
+        <a asp-action="ViewResults" asp-route-id="@quiz?.QuizID" class="btn btn-primary">
+            <i class="fas fa-arrow-left"></i> Back to Results
+        </a>
+        <a asp-action="Export" asp-route-id="@quiz?.QuizID" class="btn btn-success">
+            <i class="fas fa-file-excel"></i> Export to Excel
+        </a>
+    </div>
+</div>

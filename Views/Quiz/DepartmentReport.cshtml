@@ -1,0 +1,72 @@
+﻿@model List<PWALMS.ViewModels.DepartmentReport>
+@{
+    ViewData["Title"] = "Department Performance Report";
+}
+
+<div class="container">
+    <h2>Department Performance Report</h2>
+
+    <div class="row mt-4">
+        @foreach (var dept in Model)
+        {
+            <div class="col-md-4 mb-3">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">@dept.DepartmentName</h5>
+                        <p><strong>Users:</strong> @dept.TotalUsers</p>
+                        <p><strong>Quizzes:</strong> @dept.TotalQuizzes</p>
+                        <p><strong>Attempts:</strong> @dept.TotalAttempts</p>
+                        <div class="progress mt-2" style="height: 25px;">
+                            <div class="progress-bar @(dept.AverageScore >= 70 ? "bg-success" : dept.AverageScore >= 50 ? "bg-warning" : "bg-danger")"
+                                 style="width: @(dept.AverageScore)%">
+                                @dept.AverageScore.ToString("0.00")%
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+
+    <div class="card mt-4">
+        <div class="card-header">
+            <h5>Detailed Statistics</h5>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Department</th>
+                            <th>Users</th>
+                            <th>Quizzes</th>
+                            <th>Attempts</th>
+                            <th>Average Score</th>
+                            <th>Rank</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @for (int i = 0; i < Model.Count; i++)
+                        {
+                            var dept = Model[i];
+                            <tr>
+                                <td>@dept.DepartmentName</td>
+                                <td>@dept.TotalUsers</td>
+                                <td>@dept.TotalQuizzes</td>
+                                <td>@dept.TotalAttempts</td>
+                                <td>
+                                    <span class="badge bg-@(dept.AverageScore >= 70 ? "success" : dept.AverageScore >= 50 ? "warning" : "danger")">
+                                        @dept.AverageScore.ToString("0.00")%
+                                    </span>
+                                </td>
+                                <td>
+                                    <span class="badge bg-primary">#@(i + 1)</span>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>

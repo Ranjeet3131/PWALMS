@@ -41,7 +41,7 @@
                                            name="question_@question.QuestionID"
                                            id="option_@option.OptionID"
                                            value="@option.OptionID"
-                                           onclick="submitAnswer(@attemptId, @question.QuestionID, @option.OptionID)">
+                                           onchange="submitAnswerFunc(@attemptId, @question.QuestionID, @option.OptionID)">
                                     <label class="form-check-label" for="option_@option.OptionID">
                                         @option.OptionText
                                     </label>
@@ -52,12 +52,12 @@
                 }
 
                 <div class="d-flex justify-content-between mt-4">
-                    <button type="button" class="btn btn-secondary" onclick="prevQuestion()"
+                    <button type="button" class="btn btn-secondary" onclick="prevQuestionFunc()"
                             id="prevBtn" style="display:none;">
                         <i class="fas fa-arrow-left"></i> Previous
                     </button>
 
-                    <button type="button" class="btn btn-primary" onclick="nextQuestion()"
+                    <button type="button" class="btn btn-primary" onclick="nextQuestionFunc()"
                             id="nextBtn">
                         Next <i class="fas fa-arrow-right"></i>
                     </button>
@@ -66,7 +66,7 @@
 
             <div class="mt-4">
                 <button type="button" class="btn btn-success btn-lg w-100"
-                        onclick="submitQuiz(@attemptId)">
+                        onclick="submitQuizFunc(@attemptId)">
                     <i class="fas fa-paper-plane"></i> Submit Quiz
                 </button>
             </div>
@@ -77,10 +77,10 @@
 @section Scripts {
     <script>
         // Quiz navigation
-        let currentQuestion = 1;
+        let currentQuestionNumber = 1;
         const totalQuestions = @questions.Count;
 
-        function showQuestion(questionNumber) {
+        function showQuestionFunc(questionNumber) {
             // Hide all questions
             for (let i = 1; i <= totalQuestions; i++) {
                 const questionEl = document.getElementById(`question-${i}`);
@@ -107,23 +107,23 @@
                 nextBtn.style.display = questionNumber < totalQuestions ? 'block' : 'none';
             }
 
-            currentQuestion = questionNumber;
+            currentQuestionNumber = questionNumber;
         }
 
-        function nextQuestion() {
-            if (currentQuestion < totalQuestions) {
-                showQuestion(currentQuestion + 1);
+        function nextQuestionFunc() {
+            if (currentQuestionNumber < totalQuestions) {
+                showQuestionFunc(currentQuestionNumber + 1);
             }
         }
 
-        function prevQuestion() {
-            if (currentQuestion > 1) {
-                showQuestion(currentQuestion - 1);
+        function prevQuestionFunc() {
+            if (currentQuestionNumber > 1) {
+                showQuestionFunc(currentQuestionNumber - 1);
             }
         }
 
         // Timer functionality
-        function startTimer(minutes) {
+        function startTimerFunc(minutes) {
             let time = minutes * 60;
             const timerElement = document.getElementById('quizTimer');
             const progressBar = document.getElementById('timerProgress');
@@ -157,7 +157,7 @@
                 if (time <= 0) {
                     clearInterval(timer);
                     alert('Time is up! Submitting quiz...');
-                    submitQuiz(@attemptId);
+                    submitQuizFunc(@attemptId);
                 }
 
                 time--;
@@ -165,10 +165,11 @@
         }
 
         // Start timer
-        startTimer(@timeLimit);
+        startTimerFunc(@timeLimit);
 
-        // Submit answer function
-        function submitAnswer(attemptId, questionId, optionId) {
+        // Submit answer function - SIMPLIFIED - NO VISUAL FEEDBACK
+        function submitAnswerFunc(attemptId, questionId, optionId) {
+            // Just save the answer, no visual feedback
             fetch('/Quiz/SubmitAnswer', {
                 method: 'POST',
                 headers: {
@@ -182,26 +183,14 @@
             })
             .then(response => response.json())
             .then(data => {
-                if (data.success) {
-                    // Mark option as selected
-                    const optionLabel = document.querySelector(`label[for="option_${optionId}"]`);
-                    if (optionLabel) {
-                        // Remove selected class from all options in this question
-                        const questionOptions = optionLabel.closest('.question-box').querySelectorAll('.form-check-label');
-                        questionOptions.forEach(label => {
-                            label.classList.remove('selected');
-                        });
-
-                        // Add selected class to chosen option
-                        optionLabel.classList.add('selected');
-                    }
-                }
+                // No visual feedback during quiz
+                console.log('Answer saved:', data);
             })
             .catch(error => console.error('Error:', error));
         }
 
         // Submit quiz function
-        function submitQuiz(attemptId) {
+        function submitQuizFunc(attemptId) {
             if (confirm('Are you sure you want to submit the quiz?')) {
                 // Create a form and submit it
                 const form = document.createElement('form');
@@ -220,17 +209,8 @@
         }
 
         // Initialize first question
-        showQuestion(1);
+        showQuestionFunc(1);
 
-        // Add CSS for selected option
-        const style = document.createElement('style');
-        style.textContent = `
-            .form-check-label.selected {
-                background-color: #cfe2ff;
-                border-radius: 4px;
-                padding: 5px;
-            }
-        `;
-        document.head.appendChild(style);
+        // REMOVED: No CSS for highlighting during quiz
     </script>
 }

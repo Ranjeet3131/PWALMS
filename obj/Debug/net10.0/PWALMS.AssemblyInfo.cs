@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("PWALMS")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+1143b12cc87f17fed5a81b2dd6d9f1a4fa96c7bf")]
 [assembly: System.Reflection.AssemblyProductAttribute("PWALMS")]
 [assembly: System.Reflection.AssemblyTitleAttribute("PWALMS")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
