@@ -47,11 +47,13 @@
 
                     @if (roleName == "Admin" || roleName == "Uploader")
                     {
-                        <a asp-action="Delete" asp-route-id="@announcement.AnnouncementID"
-                           class="btn btn-sm btn-outline-danger"
-                           onclick="return confirm('Are you sure you want to delete this announcement?')">
-                            <i class="fas fa-trash"></i>
-                        </a>
+                        <form asp-action="Delete" asp-route-id="@announcement.AnnouncementID" method="post" style="display: inline;">
+                            @Html.AntiForgeryToken()
+                            <button type="submit" class="btn btn-sm btn-outline-danger"
+                                    onclick="return confirm('Are you sure you want to delete this announcement?')">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </form>
                     }
                 </div>
             </div>

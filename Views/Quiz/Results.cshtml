@@ -54,34 +54,10 @@
                 @foreach (var answer in Model.Answers ?? new List<PWALMS.Models.UserAnswer>())
                 {
                     var question = answer.Question;
-                    <div class="card mb-3 border-@(answer.IsCorrect ? "success" : "danger")">
-                        <div class="card-header @(answer.IsCorrect ? "bg-success text-white" : "bg-danger text-white")">
-                            <h5 class="mb-0">Question</h5>
-                        </div>
                         <div class="card-body">
-                            <p class="lead">@question?.QuestionText</p>
-                            <p><strong>Your Answer:</strong> @answer.SelectedOption?.OptionText</p>
-                            @if (!isQuizTaker)
-                            {
-                                <p>
-                                    <strong>Correct Answer:</strong>
-                                    @(question?.Options?.FirstOrDefault(o => o.IsCorrect)?.OptionText ?? "N/A")
-                                </p>
-                                <p><strong>Marks:</strong> @answer.MarksObtained/@question?.Marks</p>
-                                <p>
-                                    <strong>Status:</strong>
-                                    @if (answer.IsCorrect)
-                                    {
-                                        <span class="badge bg-success">Correct</span>
-                                    }
-                                    else
-                                    {
-                                        <span class="badge bg-danger">Incorrect</span>
-                                    }
-                                </p>
-                            }
+                        <p class="mb-0 lead"><strong>Question: </strong>@question?.QuestionText</p>
+                            <p><strong>Your Answer: </strong> @answer.SelectedOption?.OptionText</p>
                         </div>
-                    </div>
                 }
             </div>
 

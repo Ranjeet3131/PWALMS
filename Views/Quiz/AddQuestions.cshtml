@@ -77,10 +77,16 @@
                                 </div>
                             </div>
                         </div>
+                            <div class="mb-3">
+                                <button type="submit" class="btn btn-primary">Add Question</button>
 
-                        <div class="mt-3">
-                            <button type="submit" class="btn btn-primary">Add Question</button>
-                            <a asp-action="Manage" class="btn btn-secondary">Finish & Go Back</a>
+                                <a asp-action="ImportQuestions" asp-route-id="@quiz?.QuizID" class="btn btn-info">
+                                    <i class="fas fa-file-excel"></i> Import from Excel
+                                </a>
+
+                                <a asp-action="Manage" class="btn btn-secondary">
+                                    <i class="fas fa-arrow-left"></i> Back to Quizzes
+                                </a>
                         </div>
                     </form>
                 </div>

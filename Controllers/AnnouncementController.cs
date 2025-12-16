@@ -74,19 +74,6 @@ namespace PWALMS.Controllers
             return View(model);
         }
 
-        // GET: /Announcement/Delete/{id}
-        public IActionResult Delete(int id)
-        {
-            if (!_authService.IsUploader() && !_authService.IsAdmin())
-                return RedirectToAction("Login", "Account");
-
-            var announcement = _context.Announcements.Find(id);
-            if (announcement == null)
-                return NotFound();
-
-            return View(announcement);
-        }
-
         // POST: /Announcement/Delete/{id}
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
@@ -98,7 +85,7 @@ namespace PWALMS.Controllers
             var announcement = _context.Announcements.Find(id);
             if (announcement != null)
             {
-                announcement.IsActive = false;
+                _context.Announcements.Remove(announcement);
                 _context.SaveChanges();
                 TempData["Success"] = "Announcement deleted successfully!";
             }

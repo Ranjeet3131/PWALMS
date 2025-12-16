@@ -28,6 +28,8 @@ builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<AuthService>();
 builder.Services.AddScoped<QuizService>();
 builder.Services.AddScoped<ExportService>();
+//import excel sheet answers questions
+builder.Services.AddScoped<ExcelImportService>();
 
 var app = builder.Build();
 

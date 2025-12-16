@@ -11,7 +11,7 @@ namespace PWALMS.Controllers
         private readonly AuthService _authService;
         private readonly QuizService _quizService;
         private readonly ApplicationDbContext _context;
-
+  
         public HomeController(AuthService authService, QuizService quizService, ApplicationDbContext context)
         {
             _authService = authService;

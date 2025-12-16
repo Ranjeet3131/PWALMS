@@ -44,6 +44,7 @@ namespace PWALMS.Models
         public DateTime? StartDate { get; set; }
         public DateTime? EndDate { get; set; }
 
+  
         public DateTime CreatedDate { get; set; } = DateTime.Now;
 
         public virtual ICollection<Question>? Questions { get; set; }
@@ -72,6 +73,8 @@ namespace PWALMS.Models
         public int SortOrder { get; set; } = 0;
 
         public virtual ICollection<Option>? Options { get; set; }
+
+      
     }
 
     public class Option
@@ -88,6 +91,7 @@ namespace PWALMS.Models
 
         public bool IsCorrect { get; set; } = false;
         public int SortOrder { get; set; } = 0;
+       
     }
 
     public class QuizAttempt
@@ -120,5 +124,6 @@ namespace PWALMS.Models
         public string Status { get; set; } = "InProgress";
 
         public virtual ICollection<UserAnswer>? Answers { get; set; }
+        
     }
 }

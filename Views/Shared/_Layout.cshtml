@@ -20,7 +20,8 @@
         <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow">
             <div class="container-fluid">
                 <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Dashboard">
-                    <i class="fas fa-graduation-cap"></i> PWA LMS
+                    <img src="~/images/pwa-logo.ico" alt="PWA Logo" style="height: 80px; margin-right: 10px; width:80px;">                       
+                    <figcaption style="font-size: 0.7em;"><i class="fas fa-graduation-cap" style="margin-top: 10px;"></i>PWA LMS</figcaption>
                 </a>
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
@@ -227,7 +228,17 @@
 
     <footer class="border-top footer text-muted">
         <div class="container">
-            &copy; @DateTime.Now.Year - Patients Welfare Association LMS
+            <div class="row align-items-center">
+                <div class="col-md-6 text-center text-md-start mb-2 mb-md-0">
+                    &copy; @DateTime.Now.Year - Patients Welfare Association LMS
+                </div>
+                <div class="col-md-6 text-center text-md-end">
+                    <small>
+                        <i class="fas fa-hospital me-1"></i> Blood Bank Management System
+                        | <i class="fas fa-users me-1"></i> Version 1.0
+                    </small>
+                </div>
+            </div>
         </div>
     </footer>
 

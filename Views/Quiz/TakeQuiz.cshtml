@@ -33,15 +33,20 @@
                         <h5>Question @(i + 1) of @questions.Count</h5>
                         <p class="lead">@question.QuestionText</p>
 
-                        <div class="options">
-                            @foreach (var option in question.Options ?? new List<PWALMS.Models.Option>())
+                        <div class="options" id="options-@question.QuestionID">
+                                @{
+                                    var optionsList = question.Options ?? new List<PWALMS.Models.Option>();
+                                    var orderedOptions = optionsList.OrderBy(o => o.SortOrder).ToList();
+                                }
+                                @foreach (var option in orderedOptions)
                             {
                                 <div class="form-check mb-2">
-                                    <input class="form-check-input" type="radio"
+                                    <input class="form-check-input question-@question.QuestionID"
+                                           type="radio"
                                            name="question_@question.QuestionID"
                                            id="option_@option.OptionID"
                                            value="@option.OptionID"
-                                           onchange="submitAnswerFunc(@attemptId, @question.QuestionID, @option.OptionID)">
+                                           onchange="submitAnswer(@attemptId, @question.QuestionID, @option.OptionID)">
                                     <label class="form-check-label" for="option_@option.OptionID">
                                         @option.OptionText
                                     </label>
@@ -50,7 +55,6 @@
                         </div>
                     </div>
                 }
-
                 <div class="d-flex justify-content-between mt-4">
                     <button type="button" class="btn btn-secondary" onclick="prevQuestionFunc()"
                             id="prevBtn" style="display:none;">
@@ -74,143 +78,182 @@
     </div>
 </div>
 
-@section Scripts {
-    <script>
-        // Quiz navigation
-        let currentQuestionNumber = 1;
-        const totalQuestions = @questions.Count;
+<script>
+    // Quiz navigation
+    let currentQuestionNumber = 1;
+    const totalQuestions = @questions.Count
 
-        function showQuestionFunc(questionNumber) {
-            // Hide all questions
-            for (let i = 1; i <= totalQuestions; i++) {
-                const questionEl = document.getElementById(`question-${i}`);
-                if (questionEl) {
-                    questionEl.style.display = 'none';
-                }
-            }
-
-            // Show selected question
-            const questionEl = document.getElementById(`question-${questionNumber}`);
+    function showQuestionFunc(questionNumber) {
+        // Hide all questions
+        for (let i = 1; i <= totalQuestions; i++) {
+            const questionEl = document.getElementById(`question-${i}`);
             if (questionEl) {
-                questionEl.style.display = 'block';
-            }
-
-            // Update navigation buttons
-            const prevBtn = document.getElementById('prevBtn');
-            const nextBtn = document.getElementById('nextBtn');
-
-            if (prevBtn) {
-                prevBtn.style.display = questionNumber > 1 ? 'block' : 'none';
-            }
-
-            if (nextBtn) {
-                nextBtn.style.display = questionNumber < totalQuestions ? 'block' : 'none';
-            }
-
-            currentQuestionNumber = questionNumber;
-        }
-
-        function nextQuestionFunc() {
-            if (currentQuestionNumber < totalQuestions) {
-                showQuestionFunc(currentQuestionNumber + 1);
+                questionEl.style.display = 'none';
             }
         }
 
-        function prevQuestionFunc() {
-            if (currentQuestionNumber > 1) {
-                showQuestionFunc(currentQuestionNumber - 1);
+        // Show selected question
+        const questionEl = document.getElementById(`question-${questionNumber}`);
+        if (questionEl) {
+            questionEl.style.display = 'block';
+        }
+
+        // Update navigation buttons
+        const prevBtn = document.getElementById('prevBtn');
+        const nextBtn = document.getElementById('nextBtn');
+
+        if (prevBtn) {
+            prevBtn.style.display = questionNumber > 1 ? 'block' : 'none';
+        }
+
+        if (nextBtn) {
+            nextBtn.style.display = questionNumber < totalQuestions ? 'block' : 'none';
+        }
+
+        currentQuestionNumber = questionNumber;
+    }
+
+    function nextQuestionFunc() {
+        if (currentQuestionNumber < totalQuestions) {
+            showQuestionFunc(currentQuestionNumber + 1);
+        }
+    }
+
+    function prevQuestionFunc() {
+        if (currentQuestionNumber > 1) {
+            showQuestionFunc(currentQuestionNumber - 1);
+        }
+    }
+
+    // Timer functionality
+    function startTimerFunc(minutes) {
+        let time = minutes * 60;
+        const timerElement = document.getElementById('quizTimer');
+        const progressBar = document.getElementById('timerProgress');
+        const totalTime = time;
+
+        if (!timerElement || !progressBar) return;
+
+        const timer = setInterval(function() {
+            const minutesLeft = Math.floor(time / 60);
+            let secondsLeft = time % 60;
+
+            secondsLeft = secondsLeft < 10 ? '0' + secondsLeft : secondsLeft;
+            timerElement.textContent = `${minutesLeft}:${secondsLeft}`;
+
+            // Update progress
+            const progress = (time / totalTime) * 100;
+            progressBar.style.width = progress + '%';
+
+            // Warning colors
+            if (time <= 60) {
+                progressBar.className = 'progress-bar bg-danger';
+                timerElement.classList.add('text-danger');
+            } else if (time <= 300) {
+                progressBar.className = 'progress-bar bg-warning';
+                timerElement.classList.add('text-warning');
+            } else {
+                progressBar.className = 'progress-bar bg-info';
+                timerElement.classList.remove('text-warning', 'text-danger');
             }
-        }
 
-        // Timer functionality
-        function startTimerFunc(minutes) {
-            let time = minutes * 60;
-            const timerElement = document.getElementById('quizTimer');
-            const progressBar = document.getElementById('timerProgress');
-            const totalTime = time;
+            if (time <= 0) {
+                clearInterval(timer);
+                alert('Time is up! Submitting quiz...');
+                submitQuizFunc(@attemptId);
+            }
 
-            if (!timerElement || !progressBar) return;
+            time--;
+        }, 1000);
+    }
 
-            const timer = setInterval(function() {
-                const minutesLeft = Math.floor(time / 60);
-                let secondsLeft = time % 60;
+    // Start timer
+    startTimerFunc(@timeLimit);
 
-                secondsLeft = secondsLeft < 10 ? '0' + secondsLeft : secondsLeft;
-                timerElement.textContent = `${minutesLeft}:${secondsLeft}`;
+    // Submit answer function - SIMPLE AND RELIABLE
+    function submitAnswer(attemptId, questionId, optionId) {
+        console.log(`Submitting answer: Q${questionId} = Option ${optionId}`);
 
-                // Update progress
-                const progress = (time / totalTime) * 100;
-                progressBar.style.width = progress + '%';
+        // Uncheck all other radios for this question
+        const radios = document.querySelectorAll(`input[name="question_${questionId}"]`);
+        radios.forEach(radio => {
+            if (radio.value != optionId) {
+                radio.checked = false;
+            }
+        });
 
-                // Warning colors
-                if (time <= 60) {
-                    progressBar.className = 'progress-bar bg-danger';
-                    timerElement.classList.add('text-danger');
-                } else if (time <= 300) {
-                    progressBar.className = 'progress-bar bg-warning';
-                    timerElement.classList.add('text-warning');
-                } else {
-                    progressBar.className = 'progress-bar bg-info';
-                    timerElement.classList.remove('text-warning', 'text-danger');
-                }
-
-                if (time <= 0) {
-                    clearInterval(timer);
-                    alert('Time is up! Submitting quiz...');
-                    submitQuizFunc(@attemptId);
-                }
-
-                time--;
-            }, 1000);
-        }
-
-        // Start timer
-        startTimerFunc(@timeLimit);
-
-        // Submit answer function - SIMPLIFIED - NO VISUAL FEEDBACK
-        function submitAnswerFunc(attemptId, questionId, optionId) {
-            // Just save the answer, no visual feedback
-            fetch('/Quiz/SubmitAnswer', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    attemptId: attemptId,
-                    questionId: questionId,
-                    optionId: optionId
-                })
+        // Send to server
+        fetch('/Quiz/SubmitAnswer', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                attemptId: attemptId,
+                questionId: questionId,
+                optionId: optionId
             })
-            .then(response => response.json())
-            .then(data => {
-                // No visual feedback during quiz
-                console.log('Answer saved:', data);
-            })
-            .catch(error => console.error('Error:', error));
-        }
-
-        // Submit quiz function
-        function submitQuizFunc(attemptId) {
-            if (confirm('Are you sure you want to submit the quiz?')) {
-                // Create a form and submit it
-                const form = document.createElement('form');
-                form.method = 'POST';
-                form.action = '/Quiz/Finish';
-
-                const input = document.createElement('input');
-                input.type = 'hidden';
-                input.name = 'attemptId';
-                input.value = attemptId;
-                form.appendChild(input);
-
-                document.body.appendChild(form);
-                form.submit();
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
             }
+            return response.json();
+        })
+        .then(data => {
+            console.log('Answer saved:', data);
+            // No visual feedback - just log success
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            // Re-check the radio button if save failed
+            const selectedRadio = document.querySelector(`#option_${optionId}`);
+            if (selectedRadio) {
+                selectedRadio.checked = true;
+            }
+        });
+    }
+
+    // Submit quiz function - FIXED VERSION
+    function submitQuizFunc(attemptId) {
+        if (confirm('Are you sure you want to submit the quiz?')) {
+            // Create a form and submit it
+            const form = document.createElement('form');
+            form.method = 'POST';
+            form.action = '/Quiz/Finish';
+
+            // Add attempt ID
+            const attemptInput = document.createElement('input');
+            attemptInput.type = 'hidden';
+            attemptInput.name = 'attemptId';
+            attemptInput.value = attemptId;
+            form.appendChild(attemptInput);
+
+            // Try to get anti-forgery token (if it exists)
+            const tokenElement = document.querySelector('input[name="__RequestVerificationToken"]');
+            if (tokenElement) {
+                const tokenInput = document.createElement('input');
+                tokenInput.type = 'hidden';
+                tokenInput.name = '__RequestVerificationToken';
+                tokenInput.value = tokenElement.value;
+                form.appendChild(tokenInput);
+            } else {
+                // If no token found, try to get from meta tag
+                const metaToken = document.querySelector('meta[name="__RequestVerificationToken"]');
+                if (metaToken) {
+                    const tokenInput = document.createElement('input');
+                    tokenInput.type = 'hidden';
+                    tokenInput.name = '__RequestVerificationToken';
+                    tokenInput.value = metaToken.content;
+                    form.appendChild(tokenInput);
+                }
+            }
+
+            document.body.appendChild(form);
+            form.submit();
         }
+    }
 
-        // Initialize first question
-        showQuestionFunc(1);
-
-        // REMOVED: No CSS for highlighting during quiz
-    </script>
-}
+    // Initialize first question
+    showQuestionFunc(1);
+</script>

@@ -13,14 +13,16 @@ namespace PWALMS.Controllers
         private readonly QuizService _quizService;
         private readonly ExportService _exportService;
         private readonly ApplicationDbContext _context;
+        private readonly ExcelImportService _excelImportService;
 
         public QuizController(AuthService authService, QuizService quizService,
-                            ExportService exportService, ApplicationDbContext context)
+                            ExportService exportService, ApplicationDbContext context , ExcelImportService excelImportService)
         {
             _authService = authService;
             _quizService = quizService;
             _exportService = exportService;
             _context = context;
+            _excelImportService = excelImportService;
         }
 
         // GET: /Quiz/Create
@@ -492,30 +494,31 @@ namespace PWALMS.Controllers
         }
 
 
-        // POST: /Quiz/SubmitAnswer
-
+        /// POST: /Quiz/SubmitAnswer
         [HttpPost]
         public JsonResult SubmitAnswer([FromBody] SubmitAnswerRequest request)
         {
             try
             {
-                Console.WriteLine("=== SUBMIT ANSWER ===");
-                Console.WriteLine($"AttemptId: {request?.AttemptId}, QuestionId: {request?.QuestionId}, OptionId: {request?.OptionId}");
+                Console.WriteLine($"SubmitAnswer: Attempt={request.AttemptId}, Question={request.QuestionId}, Option={request.OptionId}");
 
-                if (request == null || request.AttemptId <= 0 || request.QuestionId <= 0)
+                if (request.AttemptId <= 0 || request.QuestionId <= 0)
                 {
-                    return Json(new { success = false, message = "Invalid request" });
+                    return Json(new { success = false, message = "Invalid data" });
                 }
 
-                // Check attempt
+                // Check if attempt exists and is in progress
                 var attempt = _context.QuizAttempts.Find(request.AttemptId);
                 if (attempt == null || attempt.Status != "InProgress")
                 {
                     return Json(new { success = false, message = "Attempt not found or not in progress" });
                 }
 
-                // Check question
-                var question = _context.Questions.Find(request.QuestionId);
+                // Find question
+                var question = _context.Questions
+                    .Include(q => q.Options)
+                    .FirstOrDefault(q => q.QuestionID == request.QuestionId);
+
                 if (question == null)
                 {
                     return Json(new { success = false, message = "Question not found" });
@@ -525,26 +528,40 @@ namespace PWALMS.Controllers
                 bool isCorrect = false;
                 if (request.OptionId.HasValue)
                 {
-                    var option = _context.Options
-                        .FirstOrDefault(o => o.OptionID == request.OptionId.Value && o.QuestionID == request.QuestionId);
+                    var option = question.Options?.FirstOrDefault(o => o.OptionID == request.OptionId.Value);
                     isCorrect = option?.IsCorrect ?? false;
                 }
 
-                // Save answer
-                var answer = new UserAnswer
-                {
-                    AttemptID = request.AttemptId,
-                    QuestionID = request.QuestionId,
-                    SelectedOptionID = request.OptionId,
-                    IsCorrect = isCorrect,
-                    MarksObtained = isCorrect ? question.Marks : 0,
-                    AnsweredTime = DateTime.Now
-                };
+                // Check if answer already exists
+                var existingAnswer = _context.UserAnswers
+                    .FirstOrDefault(a => a.AttemptID == request.AttemptId && a.QuestionID == request.QuestionId);
 
-                _context.UserAnswers.Add(answer);
+                if (existingAnswer != null)
+                {
+                    // Update existing answer
+                    existingAnswer.SelectedOptionID = request.OptionId;
+                    existingAnswer.IsCorrect = isCorrect;
+                    existingAnswer.MarksObtained = isCorrect ? question.Marks : 0;
+                    existingAnswer.AnsweredTime = DateTime.Now;
+                    _context.UserAnswers.Update(existingAnswer);
+                }
+                else
+                {
+                    // Create new answer
+                    var answer = new UserAnswer
+                    {
+                        AttemptID = request.AttemptId,
+                        QuestionID = request.QuestionId,
+                        SelectedOptionID = request.OptionId,
+                        IsCorrect = isCorrect,
+                        MarksObtained = isCorrect ? question.Marks : 0,
+                        AnsweredTime = DateTime.Now
+                    };
+                    _context.UserAnswers.Add(answer);
+                }
+
                 _context.SaveChanges();
 
-                Console.WriteLine($"Answer saved. IsCorrect: {isCorrect}");
                 return Json(new
                 {
                     success = true,
@@ -554,7 +571,7 @@ namespace PWALMS.Controllers
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"ERROR: {ex.Message}");
+                Console.WriteLine($"ERROR in SubmitAnswer: {ex.Message}");
                 return Json(new { success = false, message = ex.Message });
             }
         }
@@ -845,6 +862,105 @@ namespace PWALMS.Controllers
             }
 
             return RedirectToAction("Manage");
+        }
+
+        // GET: /Quiz/ImportQuestions/{id}
+        public IActionResult ImportQuestions(int id)
+        {
+            if (!_authService.IsUploader() && !_authService.IsAdmin())
+                return RedirectToAction("Login", "Account");
+
+            var quiz = _context.Quizzes.Find(id);
+            if (quiz == null)
+                return NotFound();
+
+            ViewBag.Quiz = quiz;
+            return View();
+        }
+
+        // POST: /Quiz/ImportQuestions
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ImportQuestions(int quizId, IFormFile excelFile)
+        {
+            if (!_authService.IsUploader() && !_authService.IsAdmin())
+                return RedirectToAction("Login", "Account");
+
+            var quiz = _context.Quizzes.Find(quizId);
+            if (quiz == null)
+            {
+                TempData["Error"] = "Quiz not found!";
+                return RedirectToAction("Manage");
+            }
+
+            // Validate file
+            if (excelFile == null || excelFile.Length == 0)
+            {
+                TempData["Error"] = "Please select an Excel file!";
+                return RedirectToAction("ImportQuestions", new { id = quizId });
+            }
+
+            // Check file extension
+            var extension = Path.GetExtension(excelFile.FileName).ToLower();
+            if (extension != ".xlsx")
+            {
+                TempData["Error"] = "Only .xlsx files are allowed!";
+                return RedirectToAction("ImportQuestions", new { id = quizId });
+            }
+
+            // Check file size (max 5MB)
+            if (excelFile.Length > 5 * 1024 * 1024)
+            {
+                TempData["Error"] = "File size must be less than 5MB!";
+                return RedirectToAction("ImportQuestions", new { id = quizId });
+            }
+
+            try
+            {
+                using (var stream = new MemoryStream())
+                {
+                    await excelFile.CopyToAsync(stream);
+                    stream.Position = 0;
+
+                    (int imported, int errors) = _excelImportService.ImportQuestionsFromExcel(quizId, stream);
+
+                    if (imported > 0)
+                    {
+                        TempData["Success"] = $"Successfully imported {imported} questions!";
+                        if (errors > 0)
+                        {
+                            TempData["Warning"] = $"{errors} rows had errors and were skipped.";
+                        }
+                    }
+                    else
+                    {
+                        TempData["Error"] = "No questions were imported. Please check your Excel format.";
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                TempData["Error"] = $"Error importing questions: {ex.Message}";
+            }
+
+            return RedirectToAction("AddQuestions", new { id = quizId });
+        }
+
+        // GET: /Quiz/DownloadTemplate
+        public IActionResult DownloadTemplate()
+        {
+            try
+            {
+                var templateBytes = _excelImportService.GenerateTemplate();
+                return File(templateBytes,
+                           "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                           "question_template.xlsx");
+            }
+            catch (Exception ex)
+            {
+                TempData["Error"] = $"Error generating template: {ex.Message}";
+                return RedirectToAction("Manage");
+            }
         }
     }
     }

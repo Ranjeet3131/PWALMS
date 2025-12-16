@@ -1,0 +1,179 @@
+﻿@{
+    ViewData["Title"] = "Import Questions from Excel";
+    var quiz = ViewBag.Quiz as PWALMS.Models.Quiz;
+}
+
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0"><i class="fas fa-file-excel"></i> Import Questions from Excel</h4>
+                </div>
+                <div class="card-body">
+                    <h5>Quiz: @quiz?.QuizTitle</h5>
+
+                    <div class="alert alert-info">
+                        <h6><i class="fas fa-info-circle"></i> Instructions:</h6>
+                        <ol>
+                            <li>Download the template below</li>
+                            <li>Fill in your questions following the format</li>
+                            <li>Upload the completed file</li>
+                            <li>Questions will be automatically added to the quiz</li>
+                        </ol>
+
+                        <h6 class="mt-3">Excel Format:</h6>
+                        <table class="table table-bordered table-sm">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Column</th>
+                                    <th>Description</th>
+                                    <th>Example</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>A</td>
+                                    <td>Question Text</td>
+                                    <td>What is blood pressure?</td>
+                                </tr>
+                                <tr>
+                                    <td>B</td>
+                                    <td>Marks (number)</td>
+                                    <td>1</td>
+                                </tr>
+                                <tr>
+                                    <td>C</td>
+                                    <td>Option 1</td>
+                                    <td>120/80 mmHg</td>
+                                </tr>
+                                <tr>
+                                    <td>D</td>
+                                    <td>Option 2</td>
+                                    <td>140/90 mmHg</td>
+                                </tr>
+                                <tr>
+                                    <td>E</td>
+                                    <td>Option 3</td>
+                                    <td>100/60 mmHg</td>
+                                </tr>
+                                <tr>
+                                    <td>F</td>
+                                    <td>Option 4</td>
+                                    <td>160/100 mmHg</td>
+                                </tr>
+                                <tr>
+                                    <td>G</td>
+                                    <td>Correct Option (1-4)</td>
+                                    <td>1</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="text-center mb-4">
+                        <a asp-action="DownloadTemplate" class="btn btn-success btn-lg">
+                            <i class="fas fa-download"></i> Download Excel Template
+                        </a>
+                    </div>
+
+                    <form asp-action="ImportQuestions" method="post" enctype="multipart/form-data" id="uploadForm">
+                        <input type="hidden" name="quizId" value="@quiz?.QuizID" />
+                        @Html.AntiForgeryToken()
+
+                        <div class="mb-3">
+                            <label class="form-label">Select Excel File (.xlsx)</label>
+                            <input type="file" name="excelFile" class="form-control"
+                                   accept=".xlsx" required id="excelFile">
+                            <div class="form-text">
+                                Maximum file size: 5MB. Only .xlsx files are accepted.
+                            </div>
+                            <div id="fileError" class="text-danger" style="display: none;"></div>
+                        </div>
+
+                        <div class="progress mb-3" style="display: none;" id="progressBar">
+                            <div class="progress-bar progress-bar-striped progress-bar-animated"
+                                 role="progressbar" style="width: 0%"></div>
+                        </div>
+
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary btn-lg" id="uploadBtn">
+                                <i class="fas fa-upload"></i> Upload and Import Questions
+                            </button>
+                            <a asp-action="AddQuestions" asp-route-id="@quiz?.QuizID" class="btn btn-secondary">
+                                <i class="fas fa-arrow-left"></i> Back to Manual Entry
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        document.getElementById('uploadForm').addEventListener('submit', function(e) {
+            const fileInput = document.getElementById('excelFile');
+            const fileError = document.getElementById('fileError');
+            const uploadBtn = document.getElementById('uploadBtn');
+            const progressBar = document.getElementById('progressBar');
+
+            // Reset errors
+            fileError.style.display = 'none';
+            fileError.textContent = '';
+
+            // Validate file
+            if (!fileInput.files.length) {
+                e.preventDefault();
+                fileError.textContent = 'Please select a file.';
+                fileError.style.display = 'block';
+                return false;
+            }
+
+            const file = fileInput.files[0];
+            const fileSize = file.size / 1024 / 1024; // MB
+            const fileExtension = file.name.split('.').pop().toLowerCase();
+
+            // Check file size
+            if (fileSize > 5) {
+                e.preventDefault();
+                fileError.textContent = 'File size must be less than 5MB.';
+                fileError.style.display = 'block';
+                return false;
+            }
+
+            // Check file extension
+            if (fileExtension !== 'xlsx') {
+                e.preventDefault();
+                fileError.textContent = 'Only .xlsx files are allowed.';
+                fileError.style.display = 'block';
+                return false;
+            }
+
+            // Show progress bar
+            uploadBtn.disabled = true;
+            uploadBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Uploading...';
+            progressBar.style.display = 'block';
+
+            // Simulate progress
+            let progress = 0;
+            const interval = setInterval(() => {
+                progress += 10;
+                document.querySelector('.progress-bar').style.width = progress + '%';
+                if (progress >= 90) clearInterval(interval);
+            }, 200);
+
+            return true;
+        });
+
+        // Preview file name
+        document.getElementById('excelFile').addEventListener('change', function(e) {
+            const fileName = this.files[0]?.name || 'No file chosen';
+            const label = this.nextElementSibling;
+            if (label && label.classList.contains('form-text')) {
+                label.textContent = `Selected: ${fileName} (Max 5MB)`;
+            }
+        });
+    </script>
+}
